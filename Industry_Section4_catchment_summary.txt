@@ -18,21 +18,21 @@ m = aprx.listMaps()[0]
 # ------------------------------------------------------------------
 
 catchments = None
-industry = None
+slam_points = None
 
 for lyr in m.listLayers():
 
     if lyr.name == "vector.SDE.WFD_Catchments_Cycle2":
         catchments = lyr
 
-    if lyr.name == "IED_Loads_SLAMv4":
+    if lyr.name == "C_33_Section4SLAMInput_v4_XYTableToPoint":
         industry = lyr
 
 if catchments is None:
     raise Exception("Catchment layer not found")
 
 if industry is None:
-    raise Exception("IED layer not found")
+    raise Exception("C_33_Section4SLAMInput_v4_XYTableToPoint layer not found")
 
 print("Layers found")
 
@@ -42,25 +42,24 @@ print("Layers found")
 
 scratch_gdb = arcpy.env.scratchGDB
 
-points_with_catchments = os.path.join(
+spatial_join_fc = os.path.join(
     scratch_gdb,
-    "IED_Loads_SLAMv4_Points_With_Catchments"
+    "IED_Catchment_SpatialJoin"
 )
 
 summary_table = (
     r"\\dubcatch\Catchments\Projects\_33_Industry\Maps\C_P33_Industry_SLAMv4"
-    r"\Industry_C_P33_Industry_SLAMv4.gdb\IED_SLAMv4_Catchment_Loads"
+    r"\Industry_C_P33_Industry_SLAMv4.gdb\IED_Catchment_Loads"
 )
 
 # ------------------------------------------------------------------
 # Spatial Join
-# Join each IED point to its catchment
 # ------------------------------------------------------------------
 
 arcpy.analysis.SpatialJoin(
-    target_features=industry,
-    join_features=catchments,
-    out_feature_class=points_with_catchments,
+    target_features=catchments,
+    join_features=industry,
+    out_feature_class=spatial_join_fc,
     join_operation="JOIN_ONE_TO_ONE",
     join_type="KEEP_ALL",
     match_option="INTERSECT"
@@ -69,28 +68,18 @@ arcpy.analysis.SpatialJoin(
 print("Spatial Join complete")
 
 # ------------------------------------------------------------------
-# Check fields
-# ------------------------------------------------------------------
-
-print("Fields in joined output:")
-
-for field in arcpy.ListFields(points_with_catchments):
-    print(field.name)
-
-# ------------------------------------------------------------------
 # Statistics
-# Sum N and P by catchment
 # ------------------------------------------------------------------
 
 arcpy.analysis.Statistics(
-    in_table=points_with_catchments,
+    in_table=spatial_join_fc,
     out_table=summary_table,
     statistics_fields=[
         ["N", "SUM"],
         ["P", "SUM"]
     ],
     case_field=[
-        "CatchmentI",
+        "CatchmentID",
         "Name"
     ]
 )
