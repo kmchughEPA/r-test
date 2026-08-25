@@ -2,3 +2,17 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# Data folders
+data/
+outputs/
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# ArcGIS
+*.lock
