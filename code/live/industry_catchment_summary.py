@@ -1,3 +1,30 @@
+"""
+Project:
+C_P33 Industry SLAM v4
+
+Script:
+industry_catchment_summary.py
+
+Purpose:
+Assign IED loads to WFD Catchments and calculate
+total nitrogen (N) and phosphorus (P) loads
+per catchment.
+
+Inputs:
+- IED_Loads_SLAMv4
+- vector.SDE.WFD_Catchments_Cycle2
+
+Outputs:
+- IED_SLAMv4_Catchment_Loads
+
+Author:
+Keelan McHugh
+
+Date:
+August 2026
+"""
+
+
 import arcpy
 import os
 
